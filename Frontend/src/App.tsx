@@ -11,7 +11,7 @@ import type { Page, PlanKey } from "./types";
 
 function App() {
   const [page, setPage] = useState<Page>("home");
-  const [plan, setPlan] = useState<PlanKey>("starter");
+  const [plan] = useState<PlanKey>("starter");
   const [usage, setUsage] = useState(0);
 
   const handleConvert = async (file: File, toFormat: string) => {
@@ -68,10 +68,7 @@ function App() {
         display="flex"
         justifyContent="center"
       >
-        <Box
-          w="full"
-          maxW={page === "login" || page === "signup" ? "xl" : "5xl"}
-        >
+        <Box w="full" maxW={page === "login" || page === "signup" ? "xl" : "5xl"}>
           {page === "home" && (
             <ConvertUpload
               plan={plan}
@@ -83,9 +80,8 @@ function App() {
           {page === "pricing" && (
             <PricingPage
               currentPlan={plan}
-              onChoosePlan={(nextPlan) => {
-                setPlan(nextPlan);
-                setPage("home");
+              onChoosePlan={() => {
+                setPage("signup");
               }}
             />
           )}
