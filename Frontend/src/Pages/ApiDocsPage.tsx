@@ -1,5 +1,27 @@
 import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
 
+const exampleRequest = `curl -X POST "https://api.grinderstudio.no/file-convert" \\
+  -H "Authorization: Bearer API_KEY" \\
+  -H "Content-type: application/json" \\
+  -d '
+{
+  "sourceFormat": "pdf",
+  "targetFormat": "docx",
+  "fileUrl": "https://example.com/files/source.pdf"
+}
+'`;
+
+const exampleResponse = `HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "data": {
+    "jobId": "conv_123456",
+    "status": "queued",
+    "downloadUrl": "https://api.grinderstudio.no/file-convert/conv_123456"
+  }
+}`;
+
 export function ApiDocsPage() {
   return (
     <Box
@@ -43,7 +65,7 @@ export function ApiDocsPage() {
         >
           <Stack gap="3">
             <Text fontWeight="semibold" color="gray.800">
-              POST /v1/convert
+              API Endpoint
             </Text>
             <Box
               bg="white"
@@ -56,10 +78,41 @@ export function ApiDocsPage() {
               color="gray.700"
               whiteSpace="pre-wrap"
             >
-              {`{
-  "sourceFormat": "pdf",
-  "targetFormat": "docx"
-}`}
+              https://api.grinderstudio.no/file-convert
+            </Box>
+
+            <Text fontWeight="semibold" color="gray.800">
+              Example Request
+            </Text>
+            <Box
+              bg="white"
+              borderWidth="1px"
+              borderColor="gray.200"
+              rounded="xl"
+              p="4"
+              fontFamily="mono"
+              fontSize="sm"
+              color="gray.700"
+              whiteSpace="pre-wrap"
+            >
+              {exampleRequest}
+            </Box>
+
+            <Text fontWeight="semibold" color="gray.800">
+              Example Response
+            </Text>
+            <Box
+              bg="white"
+              borderWidth="1px"
+              borderColor="gray.200"
+              rounded="xl"
+              p="4"
+              fontFamily="mono"
+              fontSize="sm"
+              color="gray.700"
+              whiteSpace="pre-wrap"
+            >
+              {exampleResponse}
             </Box>
           </Stack>
         </Box>

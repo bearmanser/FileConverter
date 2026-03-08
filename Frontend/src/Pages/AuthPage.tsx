@@ -13,22 +13,27 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
   const isLogin = mode === "login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
 
   const handleSubmit = async () => {
-    if (
-      !email.trim() ||
-      !password.trim() ||
-      (!isLogin && !companyName.trim())
-    ) {
+    if (!email.trim() || !password.trim() || (!isLogin && !confirmPassword.trim())) {
       setAlert({
         status: "error",
         title: "Missing information",
         description: isLogin
           ? "Enter both your email address and password."
-          : "Enter your email, password, and company name.",
+          : "Enter your email, password, and password confirmation.",
+      });
+      return;
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      setAlert({
+        status: "error",
+        title: "Passwords do not match",
+        description: "Retype the same password in both password fields.",
       });
       return;
     }
@@ -102,11 +107,12 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
 
           {!isLogin && (
             <Field.Root required>
-              <Field.Label>Company name</Field.Label>
+              <Field.Label>Retype password</Field.Label>
               <Input
-                value={companyName}
-                onChange={(event) => setCompanyName(event.target.value)}
-                placeholder="Acme Inc."
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Retype your password"
                 rounded="xl"
                 size="lg"
               />
