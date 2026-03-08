@@ -155,122 +155,137 @@ export function ConvertUpload({
           </Stack>
         </Box>
 
-        {file && (
-          <>
-            <Separator />
+        <Separator />
 
+        <Stack gap="4">
+          <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+            Conversion settings
+          </Text>
+
+          <Box
+            bg="gray.50"
+            borderWidth="1px"
+            borderColor="gray.200"
+            rounded="xl"
+            p="5"
+          >
             <Stack gap="4">
-              <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                Conversion settings
-              </Text>
-
-              <Box
-                bg="gray.50"
-                borderWidth="1px"
-                borderColor="gray.200"
-                rounded="xl"
-                p="5"
+              <HStack
+                justify="space-between"
+                align={{ base: "start", md: "center" }}
+                flexDirection={{ base: "column", md: "row" }}
+                gap="3"
               >
-                <Stack gap="4">
-                  <HStack
-                    justify="space-between"
-                    align={{ base: "start", md: "center" }}
-                    flexDirection={{ base: "column", md: "row" }}
-                    gap="3"
-                  >
-                    <Text fontSize="sm" color="gray.600">
-                      Source format
+                <Text fontSize="sm" color="gray.600">
+                  Source format
+                </Text>
+                <Box
+                  px="3"
+                  py="1.5"
+                  rounded="full"
+                  bg={file ? "purple.50" : "gray.100"}
+                  color={file ? "purple.700" : "gray.500"}
+                  fontSize="sm"
+                  fontWeight="semibold"
+                  borderWidth="1px"
+                  borderColor={file ? "purple.100" : "gray.200"}
+                >
+                  {sourceFormat || "Waiting for file"}
+                </Box>
+              </HStack>
+
+              {!file ? (
+                <Box
+                  bg="white"
+                  borderWidth="1px"
+                  borderStyle="dashed"
+                  borderColor="gray.300"
+                  rounded="xl"
+                  p="4"
+                >
+                  <Stack gap="2">
+                    <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                      Waiting for file
                     </Text>
-                    <Box
-                      px="3"
-                      py="1.5"
-                      rounded="full"
-                      bg="purple.50"
-                      color="purple.700"
-                      fontSize="sm"
-                      fontWeight="semibold"
-                      borderWidth="1px"
-                      borderColor="purple.100"
-                    >
-                      {sourceFormat || "unknown"}
-                    </Box>
-                  </HStack>
+                    <Text fontSize="sm" color="gray.500">
+                      Add a file above to unlock available output formats and
+                      start a conversion.
+                    </Text>
+                  </Stack>
+                </Box>
+              ) : availableFormats.length > 0 ? (
+                <Stack gap="4">
+                  <Text fontSize="sm" color="gray.700">
+                    Convert to
+                  </Text>
 
-                  {availableFormats.length > 0 ? (
-                    <Stack gap="4">
-                      <Text fontSize="sm" color="gray.700">
-                        Convert to
-                      </Text>
-
-                      <NativeSelect.Root size="lg">
-                        <NativeSelect.Field
-                          value={targetFormat}
-                          onChange={(e) => setTargetFormat(e.target.value)}
-                          bg="white"
-                          borderColor="gray.300"
-                          rounded="xl"
-                        >
-                          <option value="" disabled>
-                            Select output format
-                          </option>
-                          {availableFormats.map((format) => (
-                            <option key={format} value={format}>
-                              {format.toUpperCase()}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
-
-                      <Button
-                        onClick={handleConvert}
-                        loading={isConverting}
-                        colorPalette="blue"
-                        size="lg"
-                        rounded="xl"
-                        alignSelf={{ base: "stretch", sm: "start" }}
-                        minW={{ sm: "180px" }}
-                        disabled={!targetFormat || requestsRemaining === 0}
-                      >
-                        Convert
-                      </Button>
-
-                      {requestsRemaining === 0 && (
-                        <Alert.Root
-                          status="error"
-                          borderRadius="xl"
-                          borderWidth="1px"
-                        >
-                          <Alert.Indicator />
-                          <Alert.Content>
-                            <Alert.Title>Request limit reached</Alert.Title>
-                            <Alert.Description>
-                              Your {selectedPlan.name} plan has no requests
-                              remaining. Upgrade your plan to continue
-                              converting files.
-                            </Alert.Description>
-                          </Alert.Content>
-                        </Alert.Root>
-                      )}
-                    </Stack>
-                  ) : (
-                    <Box
-                      bg="orange.50"
-                      borderWidth="1px"
-                      borderColor="orange.200"
+                  <NativeSelect.Root size="lg">
+                    <NativeSelect.Field
+                      value={targetFormat}
+                      onChange={(e) => setTargetFormat(e.target.value)}
+                      bg="white"
+                      borderColor="gray.300"
                       rounded="xl"
-                      p="4"
                     >
-                      <Text fontSize="sm" color="orange.700">
-                        No conversion formats are available for this file type.
-                      </Text>
-                    </Box>
+                      <option value="" disabled>
+                        Select output format
+                      </option>
+                      {availableFormats.map((format) => (
+                        <option key={format} value={format}>
+                          {format.toUpperCase()}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
+
+                  <Button
+                    onClick={handleConvert}
+                    loading={isConverting}
+                    colorPalette="blue"
+                    size="lg"
+                    rounded="xl"
+                    alignSelf={{ base: "stretch", sm: "start" }}
+                    minW={{ sm: "180px" }}
+                    disabled={!targetFormat || requestsRemaining === 0}
+                  >
+                    Convert
+                  </Button>
+
+                  {requestsRemaining === 0 && (
+                    <Alert.Root
+                      status="error"
+                      borderRadius="xl"
+                      borderWidth="1px"
+                    >
+                      <Alert.Indicator />
+                      <Alert.Content>
+                        <Alert.Title>Request limit reached</Alert.Title>
+                        <Alert.Description>
+                          Your {selectedPlan.name} plan has no requests
+                          remaining. Upgrade your plan to continue converting
+                          files.
+                        </Alert.Description>
+                      </Alert.Content>
+                    </Alert.Root>
                   )}
                 </Stack>
-              </Box>
+              ) : (
+                <Box
+                  bg="orange.50"
+                  borderWidth="1px"
+                  borderColor="orange.200"
+                  rounded="xl"
+                  p="4"
+                >
+                  <Text fontSize="sm" color="orange.700">
+                    No conversion formats are available for this file type.
+                  </Text>
+                </Box>
+              )}
             </Stack>
-          </>
-        )}
+          </Box>
+        </Stack>
       </Stack>
     </Box>
   );
