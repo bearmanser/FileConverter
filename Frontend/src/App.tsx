@@ -2,6 +2,7 @@ import { Box, Container } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { ConvertUpload } from "./Components/ConvertUpload";
+import { Footer } from "./Components/Footer";
 import { Header } from "./Components/Header";
 import { CONVERSION_MAP, PLANS, getExtension } from "./constants";
 import { ApiDocsPage } from "./Pages/ApiDocsPage";
@@ -59,16 +60,23 @@ function App() {
   };
 
   return (
-    <Box minH="100vh" bg="white">
+    <Box minH="100vh" bg="white" display="flex" flexDirection="column">
       <Header currentPage={page} onNavigate={setPage} />
 
       <Container
+        as="main"
         maxW="5xl"
+        flex="1"
         py={{ base: "10", md: "16" }}
         display="flex"
+        alignItems="center"
         justifyContent="center"
+        minH={{ base: "calc(100vh - 180px)", md: "calc(100vh - 208px)" }}
       >
-        <Box w="full" maxW={page === "login" || page === "signup" ? "xl" : "5xl"}>
+        <Box
+          w="full"
+          maxW={page === "login" || page === "signup" ? "xl" : "5xl"}
+        >
           {page === "home" && (
             <ConvertUpload
               plan={plan}
@@ -89,6 +97,8 @@ function App() {
           {page === "signup" && <AuthPage mode="signup" onNavigate={setPage} />}
         </Box>
       </Container>
+
+      <Footer />
     </Box>
   );
 }
