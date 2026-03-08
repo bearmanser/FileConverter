@@ -20,15 +20,11 @@ type ConvertUploadProps = {
   usage: number;
   onConvert: (
     file: File,
-    toFormat: string,
+    toFormat: string
   ) => Promise<{ success: boolean; message: string }>;
 };
 
-export function ConvertUpload({
-  onConvert,
-  plan,
-  usage,
-}: ConvertUploadProps) {
+export function ConvertUpload({ onConvert, plan, usage }: ConvertUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState("");
   const [isConverting, setIsConverting] = useState(false);
@@ -190,7 +186,7 @@ export function ConvertUpload({
                   borderWidth="1px"
                   borderColor={file ? "purple.100" : "gray.200"}
                 >
-                  {sourceFormat || "Waiting for file"}
+                  {sourceFormat || "No file uploaded"}
                 </Box>
               </HStack>
 
@@ -205,7 +201,7 @@ export function ConvertUpload({
                 >
                   <Stack gap="2">
                     <Text fontSize="sm" fontWeight="semibold" color="gray.700">
-                      Waiting for file
+                      No file uploaded
                     </Text>
                     <Text fontSize="sm" color="gray.500">
                       Add a file above to unlock available output formats and
