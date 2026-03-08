@@ -12,7 +12,7 @@ export function Footer() {
               Fast, simple file conversion for teams and apps.
             </Text>
             <Text fontSize="sm" color="gray.500">
-              © {year} ConvertFlow. All rights reserved.
+              © {year} FileConvert. All rights reserved.
             </Text>
           </Stack>
 

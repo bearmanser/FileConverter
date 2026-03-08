@@ -18,7 +18,11 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
   const [alert, setAlert] = useState<AlertState>(null);
 
   const handleSubmit = async () => {
-    if (!email.trim() || !password.trim() || (!isLogin && !confirmPassword.trim())) {
+    if (
+      !email.trim() ||
+      !password.trim() ||
+      (!isLogin && !confirmPassword.trim())
+    ) {
       setAlert({
         status: "error",
         title: "Missing information",
@@ -74,7 +78,7 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
           <Text color="gray.600">
             {isLogin
               ? "Sign in to manage conversions and API usage."
-              : "Join ConvertFlow and start converting files faster."}
+              : "Join FileConvert and start converting files faster."}
           </Text>
         </Stack>
 

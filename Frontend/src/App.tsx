@@ -51,11 +51,7 @@ function App() {
 
     return {
       success: true,
-      message: `${
-        file.name
-      } was converted to ${toFormat.toUpperCase()}. 1 request was used from your ${
-        selectedPlan.name
-      } plan.`,
+      message: `${file.name} was converted to ${toFormat.toUpperCase()}.`,
     };
   };
 
