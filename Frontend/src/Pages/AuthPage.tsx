@@ -45,7 +45,7 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
     setAlert(null);
     setIsSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     setAlert({
       status: "error",
@@ -77,8 +77,8 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
           </Text>
           <Text color="gray.600">
             {isLogin
-              ? "Sign in to manage conversions and API usage."
-              : "Join FileConvert and start converting files faster."}
+              ? "Sign in to access your workspace and manage conversions."
+              : "Create your FileConvert account and get started in seconds."}
           </Text>
         </Stack>
 
@@ -130,7 +130,7 @@ export function AuthPage({ mode, onNavigate }: AuthPageProps) {
             onClick={handleSubmit}
             loading={isSubmitting}
           >
-            {isLogin ? "Login" : "Sign Up"}
+            {isLogin ? "Login" : "Create Account"}
           </Button>
 
           <Button

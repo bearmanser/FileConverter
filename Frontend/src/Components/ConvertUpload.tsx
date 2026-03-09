@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   FileUpload,
@@ -11,14 +10,11 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 
-import { PLANS, getExtension } from "../constants";
-import type { AlertState, ConversionMap, PlanKey } from "../types";
+import type { AlertState, ConversionMap } from "../types";
 import { StatusAlert } from "./StatusAlert";
 
 type ConvertUploadProps = {
   conversionMap: ConversionMap;
-  plan: PlanKey;
-  usage: number;
   onConvert: (
     file: File,
     toFormat: string
@@ -28,19 +24,13 @@ type ConvertUploadProps = {
 export function ConvertUpload({
   conversionMap,
   onConvert,
-  plan,
-  usage,
 }: ConvertUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState("");
   const [isConverting, setIsConverting] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
 
-  const sourceFormat = file ? getExtension(file.name) : "";
-  const selectedPlan = PLANS[plan];
-  const requestLimit = selectedPlan.requestLimit;
-  const requestsRemaining =
-    requestLimit === null ? null : Math.max(requestLimit - usage, 0);
+  const sourceFormat = file ? file.name.toLowerCase().split(".").pop() ?? "" : "";
 
   const availableFormats = useMemo(() => {
     if (!sourceFormat) {
@@ -97,8 +87,7 @@ export function ConvertUpload({
           </Text>
           <Text fontSize="md" color="gray.600" maxW="2xl">
             Upload a document, image, spreadsheet, video, or audio file, choose
-            an available output format, and let the local FastAPI backend handle
-            the conversion.
+            an output format, and download the converted result instantly.
           </Text>
         </Stack>
 
@@ -125,12 +114,7 @@ export function ConvertUpload({
                 flexWrap="wrap"
               >
                 <FileUpload.Trigger asChild>
-                  <Button
-                    colorPalette="blue"
-                    size="lg"
-                    rounded="xl"
-                    disabled={requestsRemaining === 0}
-                  >
+                  <Button colorPalette="blue" size="lg" rounded="xl">
                     Choose file
                   </Button>
                 </FileUpload.Trigger>
@@ -250,28 +234,10 @@ export function ConvertUpload({
                     rounded="xl"
                     alignSelf={{ base: "stretch", sm: "start" }}
                     minW={{ sm: "180px" }}
-                    disabled={!targetFormat || requestsRemaining === 0}
+                    disabled={!targetFormat}
                   >
                     Convert
                   </Button>
-
-                  {requestsRemaining === 0 && (
-                    <Alert.Root
-                      status="error"
-                      borderRadius="xl"
-                      borderWidth="1px"
-                    >
-                      <Alert.Indicator />
-                      <Alert.Content>
-                        <Alert.Title>Request limit reached</Alert.Title>
-                        <Alert.Description>
-                          Your {selectedPlan.name} plan has no requests
-                          remaining. Upgrade your plan to continue converting
-                          files.
-                        </Alert.Description>
-                      </Alert.Content>
-                    </Alert.Root>
-                  )}
                 </Stack>
               ) : (
                 <Box
@@ -282,8 +248,7 @@ export function ConvertUpload({
                   p="4"
                 >
                   <Text fontSize="sm" color="orange.700">
-                    No conversion formats are available for this file type in
-                    the local backend.
+                    No conversion formats are available for this file type.
                   </Text>
                 </Box>
               )}

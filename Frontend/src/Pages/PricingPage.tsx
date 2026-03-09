@@ -4,14 +4,10 @@ import { PLANS } from "../constants";
 import type { PlanKey } from "../types";
 
 type PricingPageProps = {
-  currentPlan: PlanKey;
   onChoosePlan: (plan: PlanKey) => void;
 };
 
-export function PricingPage({
-  currentPlan,
-  onChoosePlan,
-}: PricingPageProps) {
+export function PricingPage({ onChoosePlan }: PricingPageProps) {
   const pricingPlans = Object.values(PLANS);
 
   return (
@@ -33,14 +29,12 @@ export function PricingPage({
             Simple pricing
           </Text>
           <Text color="gray.600">
-            Choose a request volume that fits your product and workflow.
+            Choose the experience that best fits your workflow and team.
           </Text>
         </Stack>
 
         <HStack align="stretch" gap="6" flexWrap="wrap">
           {pricingPlans.map((plan) => {
-            const isCurrent = currentPlan === plan.key;
-
             return (
               <Box
                 key={plan.key}
@@ -112,11 +106,11 @@ export function PricingPage({
                   <Button
                     mt="auto"
                     colorPalette="blue"
-                    variant={isCurrent ? "subtle" : "solid"}
+                    variant={plan.highlighted ? "solid" : "subtle"}
                     rounded="xl"
                     onClick={() => onChoosePlan(plan.key)}
                   >
-                    {isCurrent ? `Current Plan: ${plan.name}` : plan.cta}
+                    {plan.cta}
                   </Button>
                 </Stack>
               </Box>

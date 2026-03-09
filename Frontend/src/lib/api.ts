@@ -8,18 +8,18 @@ type FormatsResponse = {
   conversions: ConversionMap;
 };
 
-export async function fetchConversionMap(): Promise<ConversionMap> {
+export async function fetchSupportedFormats(): Promise<ConversionMap> {
   const response = await fetch(FORMATS_ENDPOINT);
 
   if (!response.ok) {
-    throw new Error("The frontend could not load supported formats from the backend.");
+    throw new Error("Supported formats could not be loaded.");
   }
 
   const payload = (await response.json()) as FormatsResponse;
   return payload.conversions;
 }
 
-export async function convertFileWithBackend(file: File, targetFormat: string) {
+export async function convertFile(file: File, targetFormat: string) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("target_format", targetFormat);
@@ -48,9 +48,9 @@ export async function convertFileWithBackend(file: File, targetFormat: string) {
 async function extractErrorMessage(response: Response) {
   try {
     const payload = (await response.json()) as { detail?: string };
-    return payload.detail ?? "The backend rejected the conversion request.";
+    return payload.detail ?? "The conversion request could not be completed.";
   } catch {
-    return "The backend rejected the conversion request.";
+    return "The conversion request could not be completed.";
   }
 }
 

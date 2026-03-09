@@ -4,17 +4,15 @@ import { useEffect, useState } from "react";
 import { ConvertUpload } from "./Components/ConvertUpload";
 import { Footer } from "./Components/Footer";
 import { Header } from "./Components/Header";
-import { API_BASE_URL, CONVERSION_MAP, PLANS, getExtension } from "./constants";
+import { API_BASE_URL, CONVERSION_MAP, getExtension } from "./constants";
 import { ApiDocsPage } from "./Pages/ApiDocsPage";
 import { AuthPage } from "./Pages/AuthPage";
 import { PricingPage } from "./Pages/PricingPage";
-import { convertFileWithBackend, fetchConversionMap } from "./lib/api";
-import type { ConversionMap, Page, PlanKey } from "./types";
+import { convertFile, fetchSupportedFormats } from "./lib/api";
+import type { ConversionMap, Page } from "./types";
 
 function App() {
   const [page, setPage] = useState<Page>("home");
-  const [plan] = useState<PlanKey>("starter");
-  const [usage, setUsage] = useState(0);
   const [conversionMap, setConversionMap] = useState<ConversionMap>(CONVERSION_MAP);
 
   useEffect(() => {
@@ -22,7 +20,7 @@ function App() {
 
     const loadFormats = async () => {
       try {
-        const nextMap = await fetchConversionMap();
+        const nextMap = await fetchSupportedFormats();
         if (isMounted) {
           setConversionMap(nextMap);
         }
@@ -41,16 +39,6 @@ function App() {
   }, []);
 
   const handleConvert = async (file: File, toFormat: string) => {
-    const selectedPlan = PLANS[plan];
-    const limit = selectedPlan.requestLimit;
-
-    if (limit !== null && usage >= limit) {
-      return {
-        success: false,
-        message: `You have reached the ${selectedPlan.name} request limit of ${limit} conversions this month.`,
-      };
-    }
-
     const sourceFormat = getExtension(file.name);
     const allowedTargets = conversionMap[sourceFormat] ?? [];
 
@@ -59,13 +47,12 @@ function App() {
         success: false,
         message: `Conversion from ${
           sourceFormat || "unknown"
-        } to ${toFormat} is not supported by the local backend.`,
+        } to ${toFormat} is not available for this file type.`,
       };
     }
 
     try {
-      const result = await convertFileWithBackend(file, toFormat);
-      setUsage((current) => current + 1);
+      const result = await convertFile(file, toFormat);
 
       return {
         success: true,
@@ -75,7 +62,7 @@ function App() {
       const message =
         error instanceof Error
           ? error.message
-          : "The frontend could not reach the local backend.";
+          : "The conversion service could not be reached.";
 
       return {
         success: false,
@@ -103,19 +90,13 @@ function App() {
           maxW={page === "login" || page === "signup" ? "xl" : "5xl"}
         >
           {page === "home" && (
-            <ConvertUpload
-              conversionMap={conversionMap}
-              plan={plan}
-              usage={usage}
-              onConvert={handleConvert}
-            />
+            <ConvertUpload conversionMap={conversionMap} onConvert={handleConvert} />
           )}
           {page === "api-docs" && (
             <ApiDocsPage apiBaseUrl={API_BASE_URL} conversionMap={conversionMap} />
           )}
           {page === "pricing" && (
             <PricingPage
-              currentPlan={plan}
               onChoosePlan={() => {
                 setPage("signup");
               }}

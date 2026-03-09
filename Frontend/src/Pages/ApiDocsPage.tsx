@@ -53,7 +53,7 @@ Content-Disposition: attachment; filename="sample.mp3"`;
           <Text color="gray.600" maxW="2xl">
             Upload documents, images, spreadsheets, videos, or audio with
             multipart form data, request a target format, and receive the
-            converted file directly from the local FastAPI server.
+            converted file directly from the conversion API.
           </Text>
         </Stack>
 
