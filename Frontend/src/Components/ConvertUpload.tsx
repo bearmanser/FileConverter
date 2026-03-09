@@ -96,8 +96,9 @@ export function ConvertUpload({
             Convert files in seconds
           </Text>
           <Text fontSize="md" color="gray.600" maxW="2xl">
-            Upload your file, choose an available output format, and let the
-            local FastAPI backend handle the conversion.
+            Upload a document, image, spreadsheet, video, or audio file, choose
+            an available output format, and let the local FastAPI backend handle
+            the conversion.
           </Text>
         </Stack>
 

@@ -15,13 +15,13 @@ function formatPairs(conversionMap: ConversionMap) {
 
 export function ApiDocsPage({ apiBaseUrl, conversionMap }: ApiDocsPageProps) {
   const exampleRequest = `curl -X POST "${apiBaseUrl}/api/convert" \\
-  -F "file=@example.docx" \\
-  -F "target_format=pdf" \\
-  --output converted.pdf`;
+  -F "file=@sample.mp4" \\
+  -F "target_format=mp3" \\
+  --output sample.mp3`;
 
   const exampleResponse = `HTTP/1.1 200 OK
-Content-Type: application/pdf
-Content-Disposition: attachment; filename="example.pdf"`;
+Content-Type: audio/mpeg
+Content-Disposition: attachment; filename="sample.mp3"`;
 
   return (
     <Box
@@ -51,8 +51,9 @@ Content-Disposition: attachment; filename="example.pdf"`;
             Integrate file conversion into your app
           </Text>
           <Text color="gray.600" maxW="2xl">
-            Upload files with multipart form data, request a target format, and
-            receive the converted file directly from the local FastAPI server.
+            Upload documents, images, spreadsheets, videos, or audio with
+            multipart form data, request a target format, and receive the
+            converted file directly from the local FastAPI server.
           </Text>
         </Stack>
 

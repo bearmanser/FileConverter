@@ -17,7 +17,7 @@ from .converters import (
 app = FastAPI(
     title="FileConverter API",
     version="0.1.0",
-    description="Local FastAPI service for converting common document, image, and spreadsheet files.",
+    description="Local FastAPI service for converting common document, image, spreadsheet, audio, and video files.",
 )
 
 app.add_middleware(

@@ -20,6 +20,17 @@ export const CONVERSION_MAP: ConversionMap = {
   csv: ["xlsx", "json", "txt", "pdf"],
   json: ["csv", "txt", "xlsx", "pdf"],
   xlsx: ["csv", "json", "txt", "pdf"],
+  mp4: ["mov", "avi", "mkv", "webm", "mp3", "wav", "aac", "ogg", "flac", "m4a"],
+  mov: ["mp4", "avi", "mkv", "webm", "mp3", "wav", "aac", "ogg", "flac", "m4a"],
+  avi: ["mp4", "mov", "mkv", "webm", "mp3", "wav", "aac", "ogg", "flac", "m4a"],
+  mkv: ["mp4", "mov", "avi", "webm", "mp3", "wav", "aac", "ogg", "flac", "m4a"],
+  webm: ["mp4", "mov", "avi", "mkv", "mp3", "wav", "aac", "ogg", "flac", "m4a"],
+  mp3: ["wav", "aac", "ogg", "flac", "m4a"],
+  wav: ["mp3", "aac", "ogg", "flac", "m4a"],
+  aac: ["mp3", "wav", "ogg", "flac", "m4a"],
+  ogg: ["mp3", "wav", "aac", "flac", "m4a"],
+  flac: ["mp3", "wav", "aac", "ogg", "m4a"],
+  m4a: ["mp3", "wav", "aac", "ogg", "flac"],
 };
 
 export const PLANS: Record<PlanKey, Plan> = {
@@ -31,7 +42,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     requestLimit: 10,
     features: [
       "10 conversion requests per month",
-      "Documents, images, and spreadsheet conversions",
+      "Documents, images, spreadsheets, audio, and video conversions",
       "Manual conversions in dashboard",
       "Community support",
     ],
@@ -46,7 +57,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     features: [
       "250 conversion requests per month",
       "Priority processing for local API requests",
-      "More complex document and data transforms",
+      "Media, document, and data transforms",
       "Email support",
     ],
     cta: "Choose Pro",

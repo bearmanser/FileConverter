@@ -4,10 +4,12 @@ import csv
 import html
 import json
 import re
+import subprocess
 import textwrap
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 from docx import Document
@@ -19,16 +21,124 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 from .conversion_map import (
+    AUDIO_FORMATS,
     DOCUMENT_FORMATS,
     IMAGE_FORMATS,
     MEDIA_TYPES,
     SUPPORTED_CONVERSIONS,
     TABULAR_FORMATS,
+    VIDEO_FORMATS,
 )
 
 
 class ConversionError(Exception):
     """Raised when the requested conversion cannot be completed."""
+
+
+EVEN_DIMENSIONS_FILTER = "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+TEMP_WORK_DIR = Path(__file__).resolve().parents[1] / ".tmp"
+
+VIDEO_TRANSCODE_OPTIONS: dict[str, tuple[str, ...]] = {
+    "mp4": (
+        "-vf",
+        EVEN_DIMENSIONS_FILTER,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
+        "-movflags",
+        "+faststart",
+    ),
+    "mov": (
+        "-vf",
+        EVEN_DIMENSIONS_FILTER,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
+    ),
+    "avi": (
+        "-vf",
+        EVEN_DIMENSIONS_FILTER,
+        "-c:v",
+        "mpeg4",
+        "-q:v",
+        "5",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "libmp3lame",
+        "-q:a",
+        "3",
+    ),
+    "mkv": (
+        "-vf",
+        EVEN_DIMENSIONS_FILTER,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
+    ),
+    "webm": (
+        "-vf",
+        EVEN_DIMENSIONS_FILTER,
+        "-c:v",
+        "libvpx-vp9",
+        "-b:v",
+        "0",
+        "-crf",
+        "32",
+        "-row-mt",
+        "1",
+        "-c:a",
+        "libopus",
+        "-b:a",
+        "128k",
+    ),
+}
+
+AUDIO_TRANSCODE_OPTIONS: dict[str, tuple[str, ...]] = {
+    "mp3": ("-map", "0:a:0", "-vn", "-c:a", "libmp3lame", "-q:a", "2"),
+    "wav": ("-map", "0:a:0", "-vn", "-c:a", "pcm_s16le"),
+    "aac": ("-map", "0:a:0", "-vn", "-c:a", "aac", "-b:a", "192k"),
+    "ogg": ("-map", "0:a:0", "-vn", "-c:a", "libvorbis", "-q:a", "5"),
+    "flac": ("-map", "0:a:0", "-vn", "-c:a", "flac"),
+    "m4a": (
+        "-map",
+        "0:a:0",
+        "-vn",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
+        "-f",
+        "ipod",
+    ),
+}
 
 
 def normalize_extension(value: str) -> str:
@@ -80,6 +190,12 @@ def convert_file(
             source_format=source_format,
             target_format=target_format,
             filename=filename,
+        )
+    elif source_format in VIDEO_FORMATS or source_format in AUDIO_FORMATS:
+        converted = convert_media(
+            content=content,
+            source_format=source_format,
+            target_format=target_format,
         )
     else:
         raise ConversionError(f"Files with the .{source_format} extension are not supported yet.")
@@ -340,6 +456,94 @@ def convert_image(*, content: bytes, source_format: str, target_format: str) -> 
 
         processed.save(output, format=save_format)
         return output.getvalue()
+
+
+def get_temp_work_dir() -> Path:
+    TEMP_WORK_DIR.mkdir(exist_ok=True)
+    return TEMP_WORK_DIR
+
+
+def create_temp_media_path(extension: str) -> Path:
+    return get_temp_work_dir() / f"{uuid4().hex}.{normalize_extension(extension)}"
+
+
+def convert_media(*, content: bytes, source_format: str, target_format: str) -> bytes:
+    if source_format in AUDIO_FORMATS and target_format in VIDEO_FORMATS:
+        raise ConversionError("Audio files can only be converted to other audio formats.")
+
+    options = VIDEO_TRANSCODE_OPTIONS.get(target_format) or AUDIO_TRANSCODE_OPTIONS.get(target_format)
+    if options is None:
+        raise ConversionError(f"Unsupported media target format: {target_format}")
+
+    ffmpeg_path = get_ffmpeg_path()
+    input_path = create_temp_media_path(source_format)
+    output_path = create_temp_media_path(target_format)
+
+    try:
+        input_path.write_bytes(content)
+        command = [
+            ffmpeg_path,
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            str(input_path),
+            *options,
+            str(output_path),
+        ]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+
+        if result.returncode != 0 or not output_path.exists() or output_path.stat().st_size == 0:
+            raise ConversionError(
+                build_ffmpeg_error_message(
+                    stderr=result.stderr,
+                    source_format=source_format,
+                    target_format=target_format,
+                )
+            )
+
+        return output_path.read_bytes()
+    finally:
+        input_path.unlink(missing_ok=True)
+        output_path.unlink(missing_ok=True)
+
+
+def get_ffmpeg_path() -> str:
+    try:
+        from imageio_ffmpeg import get_ffmpeg_exe
+    except ImportError as error:
+        raise ConversionError(
+            "Media conversion requires imageio-ffmpeg. Install the backend requirements and try again."
+        ) from error
+
+    try:
+        return get_ffmpeg_exe()
+    except Exception as error:
+        raise ConversionError(
+            "Media conversion could not start FFmpeg. Reinstall the backend requirements and try again."
+        ) from error
+
+
+def build_ffmpeg_error_message(*, stderr: str, source_format: str, target_format: str) -> str:
+    details = normalize_text(stderr)
+
+    if "matches no streams" in details or "does not contain any stream" in details:
+        return "The uploaded file does not contain an audio track that can be converted."
+
+    if "Invalid data found when processing input" in details:
+        return f"The .{source_format} file could not be decoded as audio or video."
+
+    if "Unknown encoder" in details:
+        return f"The server does not have the codec needed to create .{target_format} files."
+
+    if details:
+        return (
+            f"FFmpeg could not convert .{source_format} to .{target_format}: "
+            f"{textwrap.shorten(details, width=220, placeholder='...')}"
+        )
+
+    return f"FFmpeg could not convert .{source_format} to .{target_format}."
 
 
 def convert_tabular(

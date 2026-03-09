@@ -12,6 +12,8 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
+Media conversion is powered by `imageio-ffmpeg`, which bundles an FFmpeg binary as part of the Python dependency install. No separate system FFmpeg install is required.
+
 ## API
 
 - `GET /api/health`
@@ -21,12 +23,18 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 `POST /api/convert` expects multipart form data:
 
 - `file`: uploaded file
-- `target_format`: output extension like `pdf`, `docx`, `png`, or `xlsx`
+- `target_format`: output extension like `pdf`, `docx`, `png`, `mp4`, or `mp3`
 
 ## Supported local conversions
 
 - Documents: `pdf`, `docx`, `txt`, `md`, `html`
 - Images: `jpg`, `jpeg`, `png`, `webp`
 - Tabular: `csv`, `json`, `xlsx`
+- Video: `mp4`, `mov`, `avi`, `mkv`, `webm`
+- Audio: `mp3`, `wav`, `aac`, `ogg`, `flac`, `m4a`
 
-This setup intentionally avoids external desktop dependencies like LibreOffice and FFmpeg, so audio/video conversions are not included in the first local backend version.
+Supported media flows include:
+
+- Video to video, such as `mp4 -> webm`
+- Audio to audio, such as `wav -> mp3`
+- Video to audio extraction, such as `mp4 -> mp3`
