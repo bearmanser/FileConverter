@@ -1,19 +1,44 @@
 import { Box, Container } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ConvertUpload } from "./Components/ConvertUpload";
 import { Footer } from "./Components/Footer";
 import { Header } from "./Components/Header";
-import { CONVERSION_MAP, PLANS, getExtension } from "./constants";
+import { API_BASE_URL, CONVERSION_MAP, PLANS, getExtension } from "./constants";
 import { ApiDocsPage } from "./Pages/ApiDocsPage";
 import { AuthPage } from "./Pages/AuthPage";
 import { PricingPage } from "./Pages/PricingPage";
-import type { Page, PlanKey } from "./types";
+import { convertFileWithBackend, fetchConversionMap } from "./lib/api";
+import type { ConversionMap, Page, PlanKey } from "./types";
 
 function App() {
   const [page, setPage] = useState<Page>("home");
   const [plan] = useState<PlanKey>("starter");
   const [usage, setUsage] = useState(0);
+  const [conversionMap, setConversionMap] = useState<ConversionMap>(CONVERSION_MAP);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFormats = async () => {
+      try {
+        const nextMap = await fetchConversionMap();
+        if (isMounted) {
+          setConversionMap(nextMap);
+        }
+      } catch {
+        if (isMounted) {
+          setConversionMap(CONVERSION_MAP);
+        }
+      }
+    };
+
+    void loadFormats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleConvert = async (file: File, toFormat: string) => {
     const selectedPlan = PLANS[plan];
@@ -27,32 +52,36 @@ function App() {
     }
 
     const sourceFormat = getExtension(file.name);
-    const allowedTargets = CONVERSION_MAP[sourceFormat] ?? [];
+    const allowedTargets = conversionMap[sourceFormat] ?? [];
 
     if (!allowedTargets.includes(toFormat)) {
       return {
         success: false,
         message: `Conversion from ${
           sourceFormat || "unknown"
-        } to ${toFormat} is not supported.`,
+        } to ${toFormat} is not supported by the local backend.`,
       };
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    try {
+      const result = await convertFileWithBackend(file, toFormat);
+      setUsage((current) => current + 1);
 
-    if (file.name.toLowerCase().includes("fail")) {
+      return {
+        success: true,
+        message: result.message,
+      };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "The frontend could not reach the local backend.";
+
       return {
         success: false,
-        message: `We could not convert ${file.name}. Try a different file and try again.`,
+        message,
       };
     }
-
-    setUsage((current) => current + 1);
-
-    return {
-      success: true,
-      message: `${file.name} was converted to ${toFormat.toUpperCase()}.`,
-    };
   };
 
   return (
@@ -75,12 +104,15 @@ function App() {
         >
           {page === "home" && (
             <ConvertUpload
+              conversionMap={conversionMap}
               plan={plan}
               usage={usage}
               onConvert={handleConvert}
             />
           )}
-          {page === "api-docs" && <ApiDocsPage />}
+          {page === "api-docs" && (
+            <ApiDocsPage apiBaseUrl={API_BASE_URL} conversionMap={conversionMap} />
+          )}
           {page === "pricing" && (
             <PricingPage
               currentPlan={plan}

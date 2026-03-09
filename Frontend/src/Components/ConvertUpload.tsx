@@ -11,11 +11,12 @@ import {
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 
-import { CONVERSION_MAP, PLANS, getExtension } from "../constants";
-import type { AlertState, PlanKey } from "../types";
+import { PLANS, getExtension } from "../constants";
+import type { AlertState, ConversionMap, PlanKey } from "../types";
 import { StatusAlert } from "./StatusAlert";
 
 type ConvertUploadProps = {
+  conversionMap: ConversionMap;
   plan: PlanKey;
   usage: number;
   onConvert: (
@@ -24,7 +25,12 @@ type ConvertUploadProps = {
   ) => Promise<{ success: boolean; message: string }>;
 };
 
-export function ConvertUpload({ onConvert, plan, usage }: ConvertUploadProps) {
+export function ConvertUpload({
+  conversionMap,
+  onConvert,
+  plan,
+  usage,
+}: ConvertUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [targetFormat, setTargetFormat] = useState("");
   const [isConverting, setIsConverting] = useState(false);
@@ -41,8 +47,8 @@ export function ConvertUpload({ onConvert, plan, usage }: ConvertUploadProps) {
       return [];
     }
 
-    return CONVERSION_MAP[sourceFormat] ?? [];
-  }, [sourceFormat]);
+    return conversionMap[sourceFormat] ?? [];
+  }, [conversionMap, sourceFormat]);
 
   const handleFileChange = (details: { acceptedFiles: File[] }) => {
     const nextFile = details.acceptedFiles[0] ?? null;
@@ -90,8 +96,8 @@ export function ConvertUpload({ onConvert, plan, usage }: ConvertUploadProps) {
             Convert files in seconds
           </Text>
           <Text fontSize="md" color="gray.600" maxW="2xl">
-            Upload your file, choose an available output format, and start the
-            conversion.
+            Upload your file, choose an available output format, and let the
+            local FastAPI backend handle the conversion.
           </Text>
         </Stack>
 
@@ -275,7 +281,8 @@ export function ConvertUpload({ onConvert, plan, usage }: ConvertUploadProps) {
                   p="4"
                 >
                   <Text fontSize="sm" color="orange.700">
-                    No conversion formats are available for this file type.
+                    No conversion formats are available for this file type in
+                    the local backend.
                   </Text>
                 </Box>
               )}

@@ -2,6 +2,8 @@ export type Page = "home" | "api-docs" | "pricing" | "login" | "signup";
 
 export type PlanKey = "starter" | "pro" | "business";
 
+export type ConversionMap = Record<string, string[]>;
+
 export type Plan = {
   key: PlanKey;
   name: string;

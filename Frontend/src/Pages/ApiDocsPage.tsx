@@ -1,28 +1,28 @@
 import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
 
-const exampleRequest = `curl -X POST "https://api.grinderstudio.no/file-convert" \\
-  -H "Authorization: Bearer API_KEY" \\
-  -H "Content-type: application/json" \\
-  -d '
-{
-  "sourceFormat": "pdf",
-  "targetFormat": "docx",
-  "fileUrl": "https://example.com/files/source.pdf"
+import type { ConversionMap } from "../types";
+
+type ApiDocsPageProps = {
+  apiBaseUrl: string;
+  conversionMap: ConversionMap;
+};
+
+function formatPairs(conversionMap: ConversionMap) {
+  return Object.entries(conversionMap)
+    .map(([source, targets]) => `${source.toUpperCase()} -> ${targets.map((target) => target.toUpperCase()).join(", ")}`)
+    .join("\n");
 }
-'`;
 
-const exampleResponse = `HTTP/1.1 200 OK
-Content-Type: application/json
+export function ApiDocsPage({ apiBaseUrl, conversionMap }: ApiDocsPageProps) {
+  const exampleRequest = `curl -X POST "${apiBaseUrl}/api/convert" \\
+  -F "file=@example.docx" \\
+  -F "target_format=pdf" \\
+  --output converted.pdf`;
 
-{
-  "data": {
-    "jobId": "conv_123456",
-    "status": "queued",
-    "downloadUrl": "https://api.grinderstudio.no/file-convert/conv_123456"
-  }
-}`;
+  const exampleResponse = `HTTP/1.1 200 OK
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="example.pdf"`;
 
-export function ApiDocsPage() {
   return (
     <Box
       bg="white"
@@ -51,8 +51,8 @@ export function ApiDocsPage() {
             Integrate file conversion into your app
           </Text>
           <Text color="gray.600" maxW="2xl">
-            Upload files, request conversions, and fetch results through a
-            simple API.
+            Upload files with multipart form data, request a target format, and
+            receive the converted file directly from the local FastAPI server.
           </Text>
         </Stack>
 
@@ -65,7 +65,7 @@ export function ApiDocsPage() {
         >
           <Stack gap="3">
             <Text fontWeight="semibold" color="gray.800">
-              API Endpoint
+              API Base URL
             </Text>
             <Box
               bg="white"
@@ -78,7 +78,7 @@ export function ApiDocsPage() {
               color="gray.700"
               whiteSpace="pre-wrap"
             >
-              https://api.grinderstudio.no/file-convert
+              {apiBaseUrl}
             </Box>
 
             <Text fontWeight="semibold" color="gray.800">
@@ -114,6 +114,23 @@ export function ApiDocsPage() {
             >
               {exampleResponse}
             </Box>
+
+            <Text fontWeight="semibold" color="gray.800">
+              Supported Conversions
+            </Text>
+            <Box
+              bg="white"
+              borderWidth="1px"
+              borderColor="gray.200"
+              rounded="xl"
+              p="4"
+              fontFamily="mono"
+              fontSize="sm"
+              color="gray.700"
+              whiteSpace="pre-wrap"
+            >
+              {formatPairs(conversionMap)}
+            </Box>
           </Stack>
         </Box>
 
@@ -128,10 +145,11 @@ export function ApiDocsPage() {
             p="5"
           >
             <Text fontWeight="semibold" color="blue.800">
-              Fast uploads
+              Multipart uploads
             </Text>
             <Text mt="2" fontSize="sm" color="blue.700">
-              Multipart upload support with predictable request structure.
+              Send the source file and a `target_format` field in the same
+              request.
             </Text>
           </Box>
           <Box
@@ -144,10 +162,11 @@ export function ApiDocsPage() {
             p="5"
           >
             <Text fontWeight="semibold" color="purple.800">
-              Multiple formats
+              Direct downloads
             </Text>
             <Text mt="2" fontSize="sm" color="purple.700">
-              Convert documents, images, spreadsheets, and media formats.
+              The API responds with the converted file immediately, ready for a
+              browser download or automation workflow.
             </Text>
           </Box>
         </HStack>

@@ -1,27 +1,25 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react";
 
-import type { Plan, PlanKey } from "./types";
+import type { ConversionMap, Plan, PlanKey } from "./types";
 
 export const system = createSystem(defaultConfig);
 
-export const CONVERSION_MAP: Record<string, string[]> = {
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+export const CONVERSION_MAP: ConversionMap = {
   pdf: ["docx", "txt", "html"],
   docx: ["pdf", "txt", "html"],
   txt: ["pdf", "docx", "md", "html"],
   md: ["pdf", "docx", "html", "txt"],
-  html: ["pdf", "txt", "md"],
+  html: ["pdf", "txt", "md", "docx"],
   jpg: ["png", "webp", "pdf"],
   jpeg: ["png", "webp", "pdf"],
   png: ["jpg", "webp", "pdf"],
   webp: ["png", "jpg", "pdf"],
-  csv: ["xlsx", "json", "txt"],
-  json: ["csv", "txt"],
-  xlsx: ["csv", "pdf"],
-  mp3: ["wav", "ogg"],
-  wav: ["mp3", "ogg"],
-  mp4: ["mov", "webm", "mp3"],
-  mov: ["mp4", "webm", "mp3"],
-  webm: ["mp4", "mp3"],
+  csv: ["xlsx", "json", "txt", "pdf"],
+  json: ["csv", "txt", "xlsx", "pdf"],
+  xlsx: ["csv", "json", "txt", "pdf"],
 };
 
 export const PLANS: Record<PlanKey, Plan> = {
@@ -33,7 +31,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     requestLimit: 10,
     features: [
       "10 conversion requests per month",
-      "Basic document and image formats",
+      "Documents, images, and spreadsheet conversions",
       "Manual conversions in dashboard",
       "Community support",
     ],
@@ -47,8 +45,8 @@ export const PLANS: Record<PlanKey, Plan> = {
     requestLimit: 250,
     features: [
       "250 conversion requests per month",
-      "Documents, images, spreadsheets, and media",
-      "Priority processing",
+      "Priority processing for local API requests",
+      "More complex document and data transforms",
       "Email support",
     ],
     cta: "Choose Pro",
