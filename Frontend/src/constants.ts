@@ -5,7 +5,10 @@ import type { ConversionMap, Plan, PlanKey } from "./types";
 export const system = createSystem(defaultConfig);
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+  import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.DEV
+    ? "http://127.0.0.1:8000"
+    : "https://fileconvert-api.grinderstudio.no");
 
 export const CONVERSION_MAP: ConversionMap = {
   pdf: ["docx", "txt", "html"],
